@@ -2,25 +2,89 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #14121a;
+  --muted: #6b6676;
+  --surface: #f7f6fa;
+  --surface-2: #efedf4;
+  --border: #e3e0ea;
+  --brand: #6d43d4;
+  --brand-2: #a071e8;
+  --brand-soft: #f0eafc;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0b0a10;
+    --foreground: #ebe9f0;
+    --muted: #918ca0;
+    --surface: #131119;
+    --surface-2: #1b1824;
+    --border: #26222f;
+    --brand: #8b5cf6;
+    --brand-2: #a78bfa;
+    --brand-soft: #1a1428;
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--border);
+  --color-brand: var(--brand);
+  --color-brand-2: var(--brand-2);
+  --color-brand-soft: var(--brand-soft);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--brand);
+  color: #fff;
+}
+
+/* Recording pulse on the push-to-talk button. */
+@keyframes wispr-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--brand) 55%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 14px color-mix(in oklab, var(--brand) 0%, transparent);
+  }
+}
+
+.wispr-pulse {
+  animation: wispr-pulse 1.6s ease-out infinite;
+}
+
+/* Staggered bars for the idle waveform mark. */
+@keyframes wispr-bar {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.wispr-bar {
+  transform-origin: center;
+  animation: wispr-bar 1.1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wispr-pulse,
+  .wispr-bar {
+    animation: none;
+  }
 }
