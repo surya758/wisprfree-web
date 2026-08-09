@@ -5,7 +5,7 @@ import { SITE } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Architecture",
   description:
-    "How WisprFree works — the native pipeline, what the web version swaps out, the privacy model, and how it deploys.",
+    "How WisprFree works — the native pipeline, what the web version swaps out, and the privacy model.",
 };
 
 const STACK: { area: string; native: string; web: string }[] = [
@@ -33,7 +33,7 @@ const STACK: { area: string; native: string; web: string }[] = [
   {
     area: "Secrets",
     native: "macOS Keychain",
-    web: "Server-side env vars and a Vertex service account — the browser never sees a credential",
+    web: "Server-side only — the browser never sees a credential",
   },
   {
     area: "Storage",
@@ -43,7 +43,7 @@ const STACK: { area: string; native: string; web: string }[] = [
   {
     area: "Delivery",
     native: "Signed .zip + Sparkle auto-updates via an EdDSA-signed appcast",
-    web: "Vercel, static pages + two serverless functions",
+    web: "Static pages + serverless functions",
   },
 ];
 
@@ -56,7 +56,7 @@ const STEPS = [
   {
     n: "2",
     title: "Speech to text",
-    body: "The clip is uploaded to a route handler, which enforces a size cap, attaches the server-side key, and forwards it to Groq's Whisper endpoint. Only the resulting text comes back — the credential never crosses into the browser.",
+    body: "The clip is uploaded to a route handler, which validates it, attaches the credential server-side, and forwards it to a hosted Whisper. Only the resulting text comes back — the credential never crosses into the browser.",
   },
   {
     n: "3",
@@ -133,9 +133,8 @@ export default function ArchitecturePage() {
 
         <p className="mt-6 text-sm leading-relaxed text-muted">
           Both stages are thin server-side proxies: they validate the payload,
-          attach the credential, and hand back only the text. They bill a real
-          account per call, so they sit behind origin, rate, and volume checks
-          rather than being open to anyone who finds the URL.
+          attach the credential, and hand back only the text. Because each call
+          bills a real account, they are metered rather than left open.
         </p>
       </section>
 
@@ -207,44 +206,6 @@ export default function ArchitecturePage() {
           <p>
             That gap is the honest cost of running in a browser, and it&apos;s
             why the native app exists.
-          </p>
-        </div>
-      </section>
-
-      {/* Deployment */}
-      <section className="mt-12">
-        <h2 className="text-sm font-medium tracking-wide text-muted uppercase">
-          Deployment
-        </h2>
-        <div className="mt-5 space-y-4 text-sm leading-relaxed text-muted">
-          <p>
-            Static pages are prerendered at build time; only the two route
-            handlers run per-request, and each is a thin proxy with no
-            cold-start dependencies beyond{" "}
-            <code className="font-mono">fetch</code>. Every credential is read
-            server-side from the environment — nothing provider-shaped is ever
-            shipped to the browser or embedded in the bundle.
-          </p>
-          <p>
-            Vertex is the interesting one, because it authenticates with a
-            service-account document rather than a key string. Locally that is
-            ambient Application Default Credentials from{" "}
-            <code className="font-mono">
-              gcloud auth application-default login
-            </code>
-            ; a serverless host has no ADC, so the service-account document is
-            supplied through the environment instead and the client is built
-            once per lambda instance rather than per request. Missing either
-            provider degrades gracefully rather than crashing: the site reports
-            what isn&apos;t configured and, without cleanup, still returns the
-            raw transcript.
-          </p>
-          <p>
-            The macOS app ships differently —{" "}
-            <code className="font-mono">./release.sh</code> builds and signs the
-            bundle, updates a Sparkle appcast signed with an EdDSA key, tags the
-            commit, and publishes a GitHub release. Installed copies update
-            themselves from there.
           </p>
         </div>
       </section>
