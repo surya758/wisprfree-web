@@ -1,5 +1,6 @@
 import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { NextResponse } from "next/server";
+import { checkAbuse } from "@/lib/guard";
 import {
   cleanupSystemPrompt,
   getProfile,
@@ -78,6 +79,9 @@ interface CleanupBody {
 }
 
 export async function POST(request: Request) {
+  const refused = checkAbuse(request);
+  if (refused) return refused;
+
   if (!PROJECT && !process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
     return NextResponse.json(
       {

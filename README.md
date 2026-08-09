@@ -32,6 +32,8 @@ npm run dev
 | `GOOGLE_CLOUD_LOCATION` | Vertex region; `global` for the Gemini 3 models |
 | `VERTEX_MODEL` | Defaults to `gemini-3.6-flash` |
 | `GOOGLE_SERVICE_ACCOUNT_JSON` | Vertex credentials when there's no ADC (i.e. on Vercel) |
+| `DAILY_REQUEST_LIMIT` | Abuse guard: requests per instance per UTC day (default 400) |
+| `ALLOWED_ORIGIN` | Abuse guard: extra permitted origin, only needed if embedded elsewhere |
 
 Vertex authenticates with a service-account document, not a key string. Locally that's ambient Application Default Credentials:
 
@@ -53,6 +55,22 @@ POST /api/cleanup             application/json
   { transcript, profile,      → { text, model, provider }
     glossary: [{term, hint}] }
 ```
+
+Both routes spend real money per call and have no user account behind them, so
+`src/lib/guard.ts` runs first on each:
+
+- **Origin check** — requests whose `Origin` doesn't match the host they arrived
+  on are refused with 403. This covers the production domain, every preview URL,
+  and localhost without hardcoding any of them. It removes zero-effort curl
+  scripting; it is not a security boundary, since `Origin` is forgeable outside
+  a browser.
+- **Per-IP window** — 8 requests/minute, then 429 with `Retry-After`.
+- **Daily ceiling** — `DAILY_REQUEST_LIMIT` requests per instance per UTC day,
+  then 503. Better a dead demo than a live bill.
+
+State is per-lambda-instance (module scope, no Redis), which catches the
+realistic single-script case. A distributed attacker would need the daily
+ceiling to stop them.
 
 ## Deploy
 

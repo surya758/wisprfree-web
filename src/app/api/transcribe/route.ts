@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { checkAbuse } from "@/lib/guard";
 
 /**
  * Stage 1 of the pipeline: speech → raw text.
@@ -14,6 +15,9 @@ const MODEL = "whisper-large-v3-turbo";
 const MAX_BYTES = 20 * 1024 * 1024;
 
 export async function POST(request: Request) {
+  const refused = checkAbuse(request);
+  if (refused) return refused;
+
   const key = process.env.GROQ_API_KEY;
   if (!key) {
     return NextResponse.json(
