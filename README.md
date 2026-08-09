@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WisprFree Web
 
-## Getting Started
+A browser showcase for [**WisprFree**](https://github.com/surya758/wisprfree) — the free, open-source macOS dictation app. It runs the same two-stage pipeline the native app runs (speech → text, then an LLM cleanup pass using the app's real prompts), so you can hear it work before installing anything.
 
-First, run the development server:
+## Pages
 
-```bash
+| Route | What it does |
+|---|---|
+| `/` | Product intro, screenshots, download and source links |
+| `/demo` | Record from the mic or upload a file → raw transcript → polished text, with a word-level diff of what cleanup changed |
+| `/history` | Every dictation from this browser, stored in `localStorage`, with search, mode filter, export, and the app's Insights stats |
+| `/architecture` | Native vs. web stack, request flow, privacy model, deployment |
+
+## How the demo differs from the app
+
+The macOS app transcribes **on-device** with Parakeet/Whisper/Cohere on CoreML — audio never leaves your Mac. A browser can't load a 600 MB CoreML model, so this demo POSTs the clip to a route handler that proxies Groq's Whisper `large-v3-turbo`. Cleanup runs on **Google Vertex AI** with the prompts ported verbatim from `PromptBuilder.swift`, including the Writing-mode name dictionary.
+
+Everything else is faithful: the three modes, the 0.4 s minimum clip, and the fallback that shows the raw transcript rather than losing a dictation when cleanup fails.
+
+## Run it
+
+```sh
+npm install
+cp .env.example .env.local   # then fill in the keys
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Variable | Purpose |
+|---|---|
+| `GROQ_API_KEY` | Stage 1 — speech to text ([free key](https://console.groq.com/keys)) |
+| `GOOGLE_CLOUD_PROJECT` | Stage 2 — Vertex AI project (optional) |
+| `GOOGLE_CLOUD_LOCATION` | Vertex region; `global` for the Gemini 3 models |
+| `VERTEX_MODEL` | Defaults to `gemini-3.6-flash` |
+| `GOOGLE_SERVICE_ACCOUNT_JSON` | Vertex credentials when there's no ADC (i.e. on Vercel) |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Vertex authenticates with a service-account document, not a key string. Locally that's ambient Application Default Credentials:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```sh
+gcloud auth application-default login
+```
 
-## Learn More
+On Vercel there is no ADC — create a service account with the **Vertex AI User** role, download its JSON key, and paste the whole document into `GOOGLE_SERVICE_ACCOUNT_JSON`.
 
-To learn more about Next.js, take a look at the following resources:
+No credential reaches the browser; everything is read server-side inside the route handlers. Missing a provider degrades gracefully: the demo says what isn't configured, and without cleanup it still returns the raw transcript.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+POST /api/transcribe          multipart/form-data
+  audio: Blob                 → { text, model, provider }
 
-## Deploy on Vercel
+POST /api/cleanup             application/json
+  { transcript, profile,      → { text, model, provider }
+    glossary: [{term, hint}] }
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deploy
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Vercel with zero config — import the repo, add the environment variables above, ship. Static pages prerender at build time; only the two route handlers run per-request.
+
+## Stack
+
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4
+
+| Library | Why |
+|---|---|
+| [Motion](https://motion.dev) | Hero and scroll reveals, the mode-pill `layoutId` transition, animated history list |
+| [Lenis](https://lenis.darkroom.engineering) | Smooth scrolling, disabled under `prefers-reduced-motion` |
+| [TanStack Query](https://tanstack.com/query) | The two pipeline stages as mutations — retries off, so the printed latency is the real round trip |
+| [Zustand](https://zustand.docs.pmnd.rs) | Settings, dictionary, and history in one store, persisted to `localStorage` |
+| [@google/genai](https://googleapis.github.io/js-genai/) | Vertex AI client for the cleanup stage |
+
+## License
+
+MIT, same as the app.
