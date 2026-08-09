@@ -7,18 +7,16 @@ import { NextResponse } from "next/server";
  * neither has a user account behind it, so the only things standing between a
  * public URL and someone else's bill are these checks.
  *
- * Deliberately dependency-free. The per-IP window lives in module scope, which
- * means it is per-lambda-instance rather than global: Fluid Compute reuses
- * instances, so it catches the realistic case (one script hammering the
- * endpoint) without needing Redis. A distributed attacker spread across many
- * instances would get through — the daily ceiling is the real backstop there.
+ * Deliberately dependency-free. State lives in module scope, so it is
+ * per-instance rather than global — enough to stop one script hammering the
+ * endpoint, with the daily ceiling as the backstop for anything spread wider.
+ *
+ * Thresholds come from the environment so the deployed values aren't published
+ * in this file; the defaults below are conservative starting points.
  */
 
-/** Requests allowed per IP inside `WINDOW_MS`. */
-const PER_IP_LIMIT = 8;
+const PER_IP_LIMIT = Number(process.env.RATE_LIMIT_PER_MINUTE ?? 8);
 const WINDOW_MS = 60_000;
-
-/** Hard ceiling per instance per UTC day. Better a dead demo than a live bill. */
 const DAILY_LIMIT = Number(process.env.DAILY_REQUEST_LIMIT ?? 400);
 
 interface Bucket {
@@ -79,7 +77,7 @@ function originAllowed(request: Request): boolean {
 export function checkAbuse(request: Request): NextResponse | null {
   if (!originAllowed(request)) {
     return NextResponse.json(
-      { error: "This endpoint only serves the WisprFree demo page." },
+      { error: "This endpoint only serves the WisprFree web app." },
       { status: 403 },
     );
   }
@@ -96,7 +94,7 @@ export function checkAbuse(request: Request): NextResponse | null {
     return NextResponse.json(
       {
         error:
-          "The demo has hit its daily limit. Try again tomorrow, or run it locally with your own keys.",
+          "Daily limit reached. Try again tomorrow, or run it locally with your own keys.",
         code: "daily_limit",
       },
       { status: 503 },

@@ -86,7 +86,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Cleanup is not configured on this deployment. Set GOOGLE_CLOUD_PROJECT (plus ADC or GOOGLE_SERVICE_ACCOUNT_JSON) to enable it.",
+          "Cleanup is not configured on this deployment.",
         code: "missing_key",
       },
       { status: 503 },

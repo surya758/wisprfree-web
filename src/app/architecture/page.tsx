@@ -5,7 +5,7 @@ import { SITE } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Architecture",
   description:
-    "How WisprFree works — the native pipeline, what this web demo swaps out, the privacy model, and how it deploys.",
+    "How WisprFree works — the native pipeline, what the web version swaps out, the privacy model, and how it deploys.",
 };
 
 const STACK: { area: string; native: string; web: string }[] = [
@@ -75,8 +75,8 @@ export default function ArchitecturePage() {
     <div className="mx-auto w-full max-w-3xl px-5 py-12">
       <h1 className="text-3xl font-semibold tracking-tight">Architecture</h1>
       <p className="mt-3 leading-relaxed text-muted">
-        WisprFree is a native macOS app; this site is a browser demo of the same
-        pipeline. Here&apos;s what runs where, what the demo swaps out, and why.
+        WisprFree is a native macOS app; this site runs the same pipeline in the
+        browser. Here&apos;s what runs where, what changes, and why.
       </p>
 
       {/* Pipeline */}
@@ -106,7 +106,7 @@ export default function ArchitecturePage() {
         <p className="mt-4 text-sm leading-relaxed text-muted">
           Stage 2 is optional in both builds. With no cleanup provider
           configured, the raw transcript is what you get — the app stays useful
-          fully offline, and the demo degrades the same way.
+          fully offline, and the web version degrades the same way.
         </p>
       </section>
 
@@ -133,10 +133,9 @@ export default function ArchitecturePage() {
 
         <p className="mt-6 text-sm leading-relaxed text-muted">
           Both stages are thin server-side proxies: they validate the payload,
-          attach the credential, and hand back only the text. The full endpoint
-          contract lives in the repository README rather than here — these
-          routes bill a real account per call, so there is no reason to publish
-          a ready-made spec for them.
+          attach the credential, and hand back only the text. They bill a real
+          account per call, so they sit behind origin, rate, and volume checks
+          rather than being open to anyone who finds the URL.
         </p>
       </section>
 
@@ -151,7 +150,7 @@ export default function ArchitecturePage() {
               <tr className="border-b border-line text-left">
                 <th className="py-2.5 pr-4 font-medium">Layer</th>
                 <th className="py-2.5 pr-4 font-medium">macOS app</th>
-                <th className="py-2.5 font-medium">This demo</th>
+                <th className="py-2.5 font-medium">On the web</th>
               </tr>
             </thead>
             <tbody>
@@ -189,7 +188,7 @@ export default function ArchitecturePage() {
           </p>
           <p>
             <strong className="font-medium text-foreground">
-              In this demo,
+              On the web,
             </strong>{" "}
             a browser can&apos;t host a 600 MB CoreML model, so the clip you
             record is POSTed to a serverless function which forwards it to Groq
@@ -206,8 +205,8 @@ export default function ArchitecturePage() {
             .
           </p>
           <p>
-            That gap is the honest cost of a browser demo, and it&apos;s why the
-            native app exists.
+            That gap is the honest cost of running in a browser, and it&apos;s
+            why the native app exists.
           </p>
         </div>
       </section>
@@ -236,7 +235,7 @@ export default function ArchitecturePage() {
             ; a serverless host has no ADC, so the service-account document is
             supplied through the environment instead and the client is built
             once per lambda instance rather than per request. Missing either
-            provider degrades gracefully rather than crashing: the demo reports
+            provider degrades gracefully rather than crashing: the site reports
             what isn&apos;t configured and, without cleanup, still returns the
             raw transcript.
           </p>
@@ -263,7 +262,7 @@ export default function ArchitecturePage() {
           href="/demo"
           className="rounded-lg bg-gradient-to-br from-brand to-brand-2 px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
         >
-          Try the demo
+          Try it
         </Link>
       </div>
     </div>

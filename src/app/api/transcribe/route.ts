@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Transcription is not configured on this deployment. Set GROQ_API_KEY to enable the live demo.",
+          "Transcription is not configured on this deployment.",
         code: "missing_key",
       },
       { status: 503 },

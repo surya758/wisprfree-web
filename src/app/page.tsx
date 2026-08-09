@@ -124,7 +124,7 @@ export default function Home() {
                 className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-br from-brand to-brand-2 px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
               >
                 <WaveMark className="size-4" animated />
-                Try the browser demo
+                Try it in your browser
               </Link>
               <a
                 href={SITE.releases}
@@ -147,9 +147,8 @@ export default function Home() {
 
           <Reveal when="mount" delay={0.24}>
             <p className="mt-5 text-sm text-muted">
-              The demo runs the same two-stage pipeline in your browser — speech
-              to text, then the app&apos;s real cleanup prompts. No install, no
-              account.
+              Runs the same two-stage pipeline right here — speech to text, then
+              the app&apos;s real cleanup prompts. No install, no account.
             </p>
           </Reveal>
         </div>
@@ -253,7 +252,7 @@ export default function Home() {
                 className="mt-8 inline-flex items-center gap-2 rounded-lg bg-gradient-to-br from-brand to-brand-2 px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
               >
                 <WaveMark className="size-4" animated />
-                Open the demo
+                Start dictating
               </Link>
             </div>
           </Reveal>

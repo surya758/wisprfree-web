@@ -156,7 +156,7 @@ export function Demo() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-12">
-      <h1 className="text-3xl font-semibold tracking-tight">Live demo</h1>
+      <h1 className="text-3xl font-semibold tracking-tight">Try it</h1>
       <p className="mt-3 leading-relaxed text-muted">
         The same two-stage pipeline the Mac app runs — speech to text, then a
         cleanup pass using the app&apos;s real prompts. Talk the way you actually
@@ -248,7 +248,7 @@ export function Demo() {
       </section>
 
       {/* Recorder */}
-      <section className="mt-8 rounded-2xl border border-line bg-surface p-6 sm:p-8">
+      <section className="mt-8 rounded-2xl border border-line bg-surface p-4 sm:p-8">
         <LevelBars level={recorder.level} active={recording} />
 
         <div className="mt-6 flex flex-col items-center gap-4">
@@ -267,11 +267,11 @@ export function Demo() {
                   : "Start recording"}
             </button>
           ) : (
-            <div className="flex items-center gap-3">
+            <div className="flex w-full flex-wrap items-center justify-center gap-2.5 sm:w-auto sm:gap-3">
               <button
                 type="button"
                 onClick={onStop}
-                className="wispr-pulse inline-flex items-center gap-2.5 rounded-full bg-gradient-to-br from-brand to-brand-2 px-7 py-3.5 text-sm font-medium text-white"
+                className="wispr-pulse inline-flex items-center gap-2.5 rounded-full bg-gradient-to-br from-brand to-brand-2 px-5 py-3.5 text-sm font-medium text-white sm:px-7"
               >
                 <span className="size-2.5 rounded-[3px] bg-white" />
                 Stop &amp; transcribe
@@ -338,9 +338,8 @@ export function Demo() {
 
         {notConfigured && (
           <p className="mt-3 rounded-lg border border-line bg-background px-3.5 py-3 text-sm text-muted">
-            This deployment has no transcription key configured. Set{" "}
-            <code className="font-mono text-xs">GROQ_API_KEY</code> and redeploy
-            — see the{" "}
+            Transcription isn&apos;t configured on this deployment yet — see
+            the{" "}
             <Link
               href="/architecture"
               className="underline underline-offset-4 hover:text-foreground"
@@ -471,8 +470,9 @@ export function Demo() {
         <strong className="font-medium text-foreground">
           What&apos;s different from the Mac app:
         </strong>{" "}
-        a browser can&apos;t load a 600 MB CoreML model, so this demo sends your
-        clip to a hosted Whisper for stage one instead of running it on-device.
+        a browser can&apos;t load a 600 MB CoreML model, so the web version
+        sends your clip to a hosted Whisper for stage one instead of running it
+        on-device.
         The native app transcribes locally and only the cleanup step ever touches
         a network.{" "}
         <Link

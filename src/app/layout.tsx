@@ -40,10 +40,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <main className="flex-1">{children}</main>
           <footer className="border-t border-line">
           <div className="mx-auto flex w-full max-w-5xl flex-col gap-2 px-5 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
-            <p>
-              A web showcase of {SITE.name} — the real app is a native macOS
-              menu-bar app.
-            </p>
+            <p>Free and open source. MIT licensed.</p>
             <p className="flex gap-4">
               <a
                 href={SITE.repo}
